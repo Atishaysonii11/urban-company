@@ -1,0 +1,393 @@
+import React, { useState, useEffect } from "react";
+import { MapPin, Phone, Edit, Crosshair } from "lucide-react";
+
+const Checkout = () => {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [location, setLocation] = useState(null);
+  const [locationError, setLocationError] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
+  const defaultAddress = "New Delhi, India";
+
+  useEffect(() => {
+    setAddress(defaultAddress);
+  }, []);
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by this browser");
+      return;
+    }
+
+    setLocationError("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation({ lat: latitude, lng: longitude });
+        setAddress(
+          `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
+        );
+        setIsEditingAddress(false);
+      },
+      (error) => {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError("Location access denied by user");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError("Location information unavailable");
+            break;
+          case error.TIMEOUT:
+            setLocationError("Location request timed out");
+            break;
+          default:
+            setLocationError("An unknown error occurred");
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 600000,
+      }
+    );
+  };
+
+  const cartItems = [
+    { id: 1, name: "Haircut for men", price: 299 },
+    { id: 2, name: "Beard Trim & Design", price: 199 },
+    { id: 3, name: "Hair Wash", price: 99 },
+  ];
+
+  const totalAmount = cartItems.reduce((sum, item) => sum + item.price, 0);
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#f9fafb",
+        padding: "16px",
+      }}
+    >
+      <div style={{ maxWidth: "1152px", margin: "0 auto" }}>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px" }}
+        >
+          {/* Desktop Layout */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr",
+              gap: "24px",
+            }}
+            className="hidden lg:grid"
+          >
+            {/* Left Side - Booking Details */}
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+            >
+              {/* Address */}
+              <div
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: "8px",
+                  padding: "24px",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "600",
+                      color: "#111827",
+                      margin: 0,
+                    }}
+                  >
+                    Address
+                  </h3>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <button
+                      onClick={getCurrentLocation}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        color: "#2563eb",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                      }}
+                      onMouseOver={(e) => (e.target.style.color = "#1d4ed8")}
+                      onMouseOut={(e) => (e.target.style.color = "#2563eb")}
+                    >
+                      <Crosshair style={{ width: "16px", height: "16px" }} />
+                      <span>Current Location</span>
+                    </button>
+                    <button
+                      onClick={() => setIsEditingAddress(!isEditingAddress)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        color: "#2563eb",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                      }}
+                      onMouseOver={(e) => (e.target.style.color = "#1d4ed8")}
+                      onMouseOut={(e) => (e.target.style.color = "#2563eb")}
+                    >
+                      <Edit style={{ width: "16px", height: "16px" }} />
+                      <span>Edit</span>
+                    </button>
+                  </div>
+                </div>
+
+                {isEditingAddress ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                    }}
+                  >
+                    <textarea
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "8px",
+                        outline: "none",
+                        resize: "none",
+                        fontSize: "14px",
+                        fontFamily: "inherit",
+                      }}
+                      rows="3"
+                      placeholder="Enter your address"
+                      onFocus={(e) => (e.target.style.borderColor = "#8b5cf6")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    />
+                    <button
+                      onClick={() => setIsEditingAddress(false)}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#8b5cf6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        alignSelf: "flex-start",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.target.style.backgroundColor = "#7c3aed")
+                      }
+                      onMouseOut={(e) =>
+                        (e.target.style.backgroundColor = "#8b5cf6")
+                      }
+                    >
+                      Save Address
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                    }}
+                  >
+                    <MapPin
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        color: "#6b7280",
+                        marginTop: "2px",
+                      }}
+                    />
+                    <span style={{ color: "#374151", fontSize: "14px" }}>
+                      {address}
+                    </span>
+                  </div>
+                )}
+
+                {locationError && (
+                  <div
+                    style={{
+                      marginTop: "12px",
+                      padding: "12px",
+                      backgroundColor: "#fef2f2",
+                      border: "1px solid #fecaca",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <p
+                      style={{ fontSize: "14px", color: "#dc2626", margin: 0 }}
+                    >
+                      {locationError}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Book Now Button */}
+              <button
+                disabled={!phoneNumber.trim()}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  borderRadius: "8px",
+                  fontWeight: "600",
+                  color: "white",
+                  border: "none",
+                  cursor: phoneNumber.trim() ? "pointer" : "not-allowed",
+                  backgroundColor: phoneNumber.trim() ? "#8b5cf6" : "#d1d5db",
+                  fontSize: "16px",
+                  transition: "all 0.2s",
+                }}
+                onMouseOver={(e) => {
+                  if (phoneNumber.trim()) {
+                    e.target.style.backgroundColor = "#7c3aed";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (phoneNumber.trim()) {
+                    e.target.style.backgroundColor = "#8b5cf6";
+                  }
+                }}
+              >
+                Book Now
+              </button>
+            </div>
+
+            {/* Right Side - Cart Summary */}
+            <div>
+              <div
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: "8px",
+                  padding: "24px",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                  position: "sticky",
+                  top: "16px",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#111827",
+                    marginBottom: "16px",
+                    marginTop: 0,
+                  }}
+                >
+                  Order Summary
+                </h3>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "16px",
+                  }}
+                >
+                  {cartItems.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ color: "#374151", fontSize: "14px" }}>
+                        {item.name}
+                      </span>
+                      <span style={{ fontWeight: "500", color: "#111827" }}>
+                        ₹{item.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    borderTop: "1px solid #e5e7eb",
+                    marginTop: "16px",
+                    paddingTop: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "600",
+                        color: "#111827",
+                      }}
+                    >
+                      Total
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "700",
+                        color: "#111827",
+                      }}
+                    >
+                      ₹{totalAmount}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Additional Info */}
+                <div
+                  style={{
+                    marginTop: "16px",
+                    padding: "12px",
+                    backgroundColor: "#f9fafb",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <p style={{ fontSize: "12px", color: "#6b7280", margin: 0 }}>
+                    Final amount will be confirmed after service completion
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Checkout;
